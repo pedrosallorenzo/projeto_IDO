@@ -34,3 +34,6 @@ jobs:
 
       - name: Validate FastAPI application
         run: python -c "from app.main import app; assert app is not None"
+
+      - name: Run automated tests
+        run: python -m pytest -v
