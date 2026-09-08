@@ -1,6 +1,13 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from app.routes import reservas
+
+
+app = FastAPI(
+    title="Sistema de Reservas de Salas/Eventos"
+)
+
+app.include_router(reservas.router)
 
 
 @app.get("/")
