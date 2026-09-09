@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.routes import reservas, usuarios
+from app.routes import reservas, salas, usuarios
 
 
 app = FastAPI(
@@ -8,6 +8,7 @@ app = FastAPI(
 )
 
 app.include_router(usuarios.router)
+app.include_router(salas.router)
 app.include_router(reservas.router)
 
 
