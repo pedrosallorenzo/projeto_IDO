@@ -14,6 +14,18 @@ class UsuarioResponse(UsuarioCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
+class SalaCreate(BaseModel):
+    nome: str
+    capacidade: int
+    localizacao: str
+
+
+class SalaResponse(SalaCreate):
+    id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ReservaCreate(BaseModel):
     titulo: str
     inicio: datetime
