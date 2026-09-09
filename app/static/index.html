@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sistema de Reservas</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Sistema de Reservas de Salas</h1>
+        <p>Gerencie salas, usuários e reservas de forma simples.</p>
+    </header>
+
+    <main>
+
+        <section class="card">
+            <h2>Nova reserva</h2>
+
+            <form id="form-reserva">
+
+                <label for="titulo">Título</label>
+                <input
+                    type="text"
+                    id="titulo"
+                    required
+                >
+
+                <label for="usuario">Usuário</label>
+                <select id="usuario" required></select>
+
+                <label for="sala">Sala</label>
+                <select id="sala" required></select>
+
+                <label for="inicio">Início</label>
+                <input
+                    type="datetime-local"
+                    id="inicio"
+                    required
+                >
+
+                <label for="fim">Fim</label>
+                <input
+                    type="datetime-local"
+                    id="fim"
+                    required
+                >
+
+                <button type="submit">
+                    Reservar sala
+                </button>
+
+            </form>
+
+            <div id="mensagem"></div>
+        </section>
+
+
+        <section class="card">
+            <h2>Salas disponíveis</h2>
+
+            <div id="lista-salas"></div>
+        </section>
+
+
+        <section class="card">
+            <h2>Reservas</h2>
+
+            <div id="lista-reservas"></div>
+        </section>
+
+    </main>
+
+    <script src="/static/script.js"></script>
+
+</body>
+</html>

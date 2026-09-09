@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+
 from app.main import app
 
 
@@ -9,6 +10,5 @@ def test_home():
     response = client.get("/")
 
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Sistema de Reservas de Salas/Eventos"
-    }
+    assert response.headers["content-type"].startswith("text/html")
+    assert "Sistema de Reservas de Salas" in response.text
