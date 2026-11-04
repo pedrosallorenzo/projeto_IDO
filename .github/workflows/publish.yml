@@ -57,6 +57,10 @@ jobs:
       - name: Deploy homologation environment
         run: docker compose -f docker-compose.homolog.yml up -d
 
+      - name: Show database logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.homolog.yml logs db
+
       - name: Wait for application
         run: |
           for i in {1..20}; do
