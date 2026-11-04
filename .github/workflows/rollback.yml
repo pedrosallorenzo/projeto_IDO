@@ -1,0 +1,56 @@
+name: Rollback Homologation
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Versão para rollback"
+        required: true
+        default: "v1.0.0"
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_TAG: ${{ inputs.image_tag }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy rollback version
+        run: docker compose -f docker-compose.homolog.yml up -d
+
+      - name: Wait for application
+        run: |
+          for i in {1..20}; do
+            if curl -f http://localhost:8000/; then
+              exit 0
+            fi
+            sleep 3
+          done
+
+          docker compose -f docker-compose.homolog.yml logs
+          exit 1
+
+      - name: Show deployed version
+        run: echo "Rollback realizado para ${IMAGE_TAG}"
+
+      - name: Stop homologation environment
+        if: always()
+        run: docker compose -f docker-compose.homolog.yml down
