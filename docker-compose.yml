@@ -1,0 +1,60 @@
+services:
+
+  db:
+    image: postgres:16
+    container_name: reservas_postgres
+
+    environment:
+      POSTGRES_DB: reservas_salas
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d reservas_salas"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: reservas_redis
+
+    ports:
+      - "6379:6379"
+
+
+  app:
+    build: .
+    container_name: reservas_api
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: reservas_salas
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+      redis:
+        condition: service_started
+
+    command: >
+      sh -c "python -m app.init_db &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+
+volumes:
+  postgres_data:
