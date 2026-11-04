@@ -1,18 +1,29 @@
+# Stage 1 - Builder
+
 FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+RUN python -m pip install --upgrade pip && \
+    python -m pip install --no-cache-dir --prefix=/install -r requirements.txt
 
+# Runtime
 
 FROM python:3.12-slim
 
 WORKDIR /app
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 COPY --from=builder /install /usr/local
-COPY . .
+
+COPY app ./app
 
 EXPOSE 8000
 
