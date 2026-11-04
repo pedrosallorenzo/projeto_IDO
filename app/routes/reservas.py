@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from app.cache import redis_client
 
 from app import models, schemas
 from app.database import get_db
@@ -69,6 +70,11 @@ def criar_reserva(
     db.commit()
     db.refresh(nova_reserva)
 
+    padrao_cache = f"disponibilidade:{reserva.sala_id}:*"
+
+    for chave in redis_client.scan_iter(match=padrao_cache):
+        redis_client.delete(chave)
+
     return nova_reserva
 
 
@@ -99,7 +105,15 @@ def cancelar_reserva(
             detail="Reserva não encontrada."
         )
 
+    
+    sala_id = reserva.sala_id
+
     db.delete(reserva)
     db.commit()
 
-    return {"message": "Reserva cancelada com sucesso."}
+    padrao_cache = f"disponibilidade:{sala_id}:*"
+
+    for chave in redis_client.scan_iter(match=padrao_cache):
+        redis_client.delete(chave)
+
+    return {"message": "Reserva cancelada com sucesso."}  
