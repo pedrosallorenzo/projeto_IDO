@@ -32,3 +32,47 @@ jobs:
           tags: |
             ghcr.io/pedrosallorenzo/projeto-ido:${{ github.ref_name }}
             ghcr.io/pedrosallorenzo/projeto-ido:latest
+
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_TAG: ${{ github.ref_name }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy homologation environment
+        run: docker compose -f docker-compose.homolog.yml up -d
+
+      - name: Wait for application
+        run: |
+          for i in {1..20}; do
+            if curl -f http://localhost:8000/; then
+              exit 0
+            fi
+            sleep 3
+          done
+          docker compose -f docker-compose.homolog.yml logs
+          exit 1
+
+      - name: Validate services
+        run: |
+          docker compose -f docker-compose.homolog.yml ps
+          docker compose -f docker-compose.homolog.yml exec -T redis redis-cli ping
+
+      - name: Stop homologation environment
+        if: always()
+        run: docker compose -f docker-compose.homolog.yml down
